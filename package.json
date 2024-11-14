@@ -5,5 +5,5 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "A lightweight client-side router with prefetching capabilities."
 }
