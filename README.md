@@ -118,3 +118,13 @@ You can also prerender other important routes by rendering them inside the `rout
 In the future you will also be able to pre-render a default route that will be used as 404 by having it at /404 or /default
 
 Right now errors are shown without styling as the content of the page.
+
+## Prefetching
+
+By default, links are prefetched when they get in the user's screen using an `IntersectionObserver`. This ensures that the content is loaded in the background before the user clicks on the link, providing a smoother navigation experience.
+
+If you have too many links at once or too many requests, you can add the `prefetch="onHover"` attribute to your links or some of them (usually links to huge pages that are not often visited):
+
+```html
+<a href="/archive" prefetch="onHover">Archive</a>
+```
