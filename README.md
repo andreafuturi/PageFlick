@@ -39,6 +39,25 @@ startRouter({
 });
 ```
 
+### Direct Import
+
+You can also directly import the minified version of the router in your HTML file or paste its content inside a script tag:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My App</title>
+</head>
+<body>
+  <!-- Your website content -->
+  <script src="path/to/dist/router.min.js"></script>
+</body>
+</html>
+```
+
 ## API
 
 ### `startRouter(options)`
