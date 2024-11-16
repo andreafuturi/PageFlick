@@ -8,7 +8,7 @@ A minimal lightweight client-side router with intelligent prefetching capabiliti
 - 🔄 Smooth client-side navigation
 - 📥 Intelligent link prefetching
 - 🎯 Multiple prefetching strategies
-- 🔍 SEO-friendly
+- 🔍 SEO-friendly (works with Wordpress)
 - 📱 Mobile-friendly with data-saver mode support
 - 🎨 Built-in loading animations
 
