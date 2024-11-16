@@ -85,3 +85,36 @@ Initializes the router with the given options.
     });
   </script>
 ```
+
+## Server Configuration
+
+Configuring your server to return only the route content can make the router much more efficient. Instead of returning the entire page, the server should return only the content for the requested route when it detects a request with the message "onlyRoute".
+
+```javascript
+await fetch(url, { method: "POST", body: "onlyRoute" });
+```
+
+ This allows only the changing part of the document to be updated, improving performance and reducing bandwidth usage. 
+
+Once you configured your server to respond to this type of request, wrap the part of your document that changes in a `router` tag. Inside the `router` tag, render the current initial route inside a `route` tag like this:
+
+```html
+<-- Header menu and parts that don't change -->
+<router>
+  <route path="/" style="content-visibility: auto">home content</route>
+</router>
+<-- footer etc.. -->
+```
+
+You can also prerender other important routes by rendering them inside the `router` tag in their appropriate `route` tags for faster loading times:
+
+```html
+<router>
+  <route path="/" style="content-visibility: auto">home content</route>
+  <route path="/about" style="content-visibility: auto; display:none;">about content</route>
+</router>
+```
+
+In the future you will also be able to pre-render a default route that will be used as 404 by having it at /404 or /default
+
+Right now errors are shown without styling as the content of the page.
