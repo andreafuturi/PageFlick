@@ -11,6 +11,8 @@ A minimal lightweight client-side router with intelligent prefetching capabiliti
 - 🔍 SEO-friendly (works with Wordpress)
 - 📱 Mobile-friendly with data-saver mode support
 - 🎨 Built-in loading animations
+- 🕰️ Based on History API so you can use native browser navigation
+
 
 ## Installation
 
