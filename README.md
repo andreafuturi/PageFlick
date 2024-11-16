@@ -1,6 +1,6 @@
 # Lightweight Router
 
-A minimal lightweight client-side router with intelligent prefetching capabilities for faster websites. This tool can turn any Multi-Page Application (MPA) into a Single-Page Application (SPA) very easily and with just 1597 byte (gzipped).
+A minimal lightweight client-side router with intelligent prefetching capabilities for faster websites. This tool can turn any Multi-Page Application (MPA) into a Single-Page Application (SPA) very easily and with just ~1.5KB byte (gzipped).
 
 ## Features
 
