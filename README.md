@@ -32,11 +32,11 @@ To use the lightweight router in your project, follow these steps:
 Example:
 
 ```javascript
-import { startRouter } from 'lightweight-router';
+import { startRouter } from "lightweight-router";
 
 startRouter({
-  onRouteChange: (currentRoute) => {
-    console.log('Route changed:', currentRoute);
+  onRouteChange: currentRoute => {
+    console.log("Route changed:", currentRoute);
   },
 });
 ```
@@ -48,15 +48,15 @@ You can also directly import the minified version of the router in your HTML fil
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My App</title>
-</head>
-<body>
-  <!-- Your website content -->
-  <script src="path/to/dist/router.min.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My App</title>
+  </head>
+  <body>
+    <!-- Your website content -->
+    <script src="path/to/dist/router.min.js"></script>
+  </body>
 </html>
 ```
 
@@ -76,26 +76,27 @@ Initializes the router with the given options.
 ### Basic Example
 
 ```html
-  Your website content
-  <script type="module">
-    import { startRouter } from './router.js';
+Your website content
+<script type="module">
+  import { startRouter } from "./router.js";
 
-    startRouter({
-      onRouteChange: (currentRoute) => {
-        console.log('Route changed:', currentRoute);
-      },
-    });
-  </script>
+  startRouter({
+    onRouteChange: currentRoute => {
+      console.log("Route changed:", currentRoute);
+    },
+  });
+</script>
 ```
 
 ## Server Configuration
+
 Configuring your server to return only the route content can make the router much more efficient. Instead of returning the entire page, the server should return only the content for the requested route when it detects a request with the message "onlyRoute".
 
 ```javascript
 await fetch(url, { method: "POST", body: "onlyRoute" });
 ```
 
- This allows only the changing part of the document to be updated, improving performance and reducing bandwidth usage. 
+This allows only the changing part of the document to be updated, improving performance and reducing bandwidth usage.
 
 Once you configured your server to respond to this type of request, wrap the part of your document that changes in a `router` tag. Inside the `router` tag, render the current initial route inside a `route` tag like this:
 
@@ -132,12 +133,27 @@ If you have too many links at once or too many requests, you can add the `prefet
 <a href="/archive" prefetch="onHover">Archive</a>
 ```
 
-
 P.S. you can easily test in your website by pasting this minified version into the console.
-
 
 The minified version was created with uglify-js, clean.css and then minified again with https://packjs.com
 The size of the gzipped version was calculated with: https://dafrok.github.io/gzip-size-online/
 It's worth to note that nonethewise Terser give better results than uglify-js. The final uglify version packed by packjs.com was even smaller.
 
+## Browser Support
 
+The router supports all modern browsers. Required features:
+
+- IntersectionObserver
+- Fetch API
+- History API
+
+For older browsers, consider using the following polyfills:
+
+- intersection-observer
+- whatwg-fetch
+
+## Performance Tips
+
+- Use `content-visibility: auto` on route elements to improve rendering performance
+- Implement server-side partial responses for better bandwidth usage
+- Consider using the `prefetch="onHover"` attribute for less important links
