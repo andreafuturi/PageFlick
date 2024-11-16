@@ -87,7 +87,6 @@ Initializes the router with the given options.
 ```
 
 ## Server Configuration
-
 Configuring your server to return only the route content can make the router much more efficient. Instead of returning the entire page, the server should return only the content for the requested route when it detects a request with the message "onlyRoute".
 
 ```javascript
@@ -118,6 +117,8 @@ You can also prerender other important routes by rendering them inside the `rout
 In the future you will also be able to pre-render a default route that will be used as 404 by having it at /404 or /default
 
 Right now errors are shown without styling as the content of the page.
+
+Soon there will be a DenoJS library that will help you deal with all these routes stuff. It will also come with api routes functionality 🔥
 
 ## Prefetching
 
