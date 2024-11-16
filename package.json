@@ -1,9 +1,23 @@
 {
   "name": "lightweight-router",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/router.min.js",
+  "scripts": {
+    "dev": "npx http-server src -o",
+    "build": "node build.js",
+    "deploy": "npm run build && npm version patch && git publish && npm publish",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "A lightweight client-side router with prefetching capabilities."
+  "description": "A lightweight client-side router with prefetching capabilities.",
+  "devDependencies": {
+    "http-server": "^14.1.1",
+    "uglify-js": "^3.17.4",
+    "clean-css": "^5.3.1",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
 }

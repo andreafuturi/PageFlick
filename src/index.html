@@ -1,0 +1,24 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Router manual test Index</title>
+  </head>
+  <body>
+    <menu class="flex m-0 p-0"
+      ><a prefetch="onHover" href="/">Home</a><a preFetch="onHover" href="/about.html">About</a><a href="/admin" prefetch="onHover">Admin</a
+      ><a href="/irmfirmiror" prefetch="onHover">404</a> <a href="https://andreafuturi.com" prefetch="onHover">Google Test</a>
+    </menu>
+    HOME
+    <script type="module">
+      import { startRouter } from "./router.js";
+      // Initialize the router with a simple onRouteChange callback to test functionality
+      startRouter({
+        onRouteChange: currentRoute => {
+          console.log("Route changed:", currentRoute);
+          currentRoute.classList.add("fade-in"); // Example: simple CSS class for animation (define it in CSS if needed)
+        },
+      });
+    </script>
+  </body>
+</html>
