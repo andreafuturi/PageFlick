@@ -1,50 +1,55 @@
 let linkData = {};
 const handlePopState = async () => {
-  const router = document.querySelector("router");
+  document.body.classList.add("loading");
   const currentPath = globalThis.location.pathname;
+  const router = document.querySelector("router");
 
   let currentRoute = router.querySelector(`route[path="${currentPath}"]`);
 
+  // If the route doesn't exist in DOM, create and append it
   if (!currentRoute) {
     currentRoute = document.createElement("route");
-    currentRoute.setAttribute("path", globalThis.location.pathname);
+    currentRoute.setAttribute("path", currentPath);
     router.appendChild(currentRoute);
   }
 
-  document.body.classList.add("loading");
+  // Only fetch and render content if the route is empty
+  if (!currentRoute.innerHTML) {
+    let content = linkData[globalThis.location.href];
 
-  let content = linkData[globalThis.location.href];
-  if (!content) {
-    content = await fetchContent(globalThis.location.href);
-    linkData[globalThis.location.href] = content;
-  }
-
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(content, "text/html");
-
-  // Update the page title with the new content's title
-  const newTitle = doc.querySelector("title");
-  if (newTitle) document.title = newTitle.textContent;
-
-  currentRoute.innerHTML = doc.body.innerHTML;
-
-  // Execute scripts from the fetched content
-  const scripts = Array.from(currentRoute.querySelectorAll("script"));
-  for (const oldScript of scripts) {
-    const newScript = document.createElement("script");
-    if (oldScript.src) {
-      newScript.src = oldScript.src;
-    } else {
-      newScript.textContent = oldScript.textContent;
+    // Fetch content if it's not already cached
+    if (!content) {
+      content = await fetchContent(globalThis.location.href);
+      linkData[globalThis.location.href] = content;
     }
-    oldScript.parentNode.replaceChild(newScript, oldScript);
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(content, "text/html");
+
+    // Update the page title with the new content's title
+    const newTitle = doc.querySelector("title");
+    if (newTitle) document.title = newTitle.textContent;
+
+    currentRoute.innerHTML = doc.body.innerHTML;
+
+    // Execute scripts from the fetched content
+    const scripts = Array.from(currentRoute.querySelectorAll("script"));
+    for (const oldScript of scripts) {
+      const newScript = document.createElement("script");
+      if (oldScript.src) {
+        newScript.src = oldScript.src;
+      } else {
+        newScript.textContent = oldScript.textContent;
+      }
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    }
   }
 
+  // Display only the current route
   router.querySelectorAll("route").forEach(route => (route.style.display = "none"));
   currentRoute.style.display = "contents";
 
   document.body.classList.remove("loading");
-  // Reset scroll position to the top
   window.scrollTo(0, 0);
 
   // Call the route change handler if it's set
@@ -191,6 +196,7 @@ const startRouter = (options = {}) => {
 export { startRouter };
 
 // TODO: create ultra minified version or deploy
+// TODO: write proper automated tests
 // - add support for prefetching on hover
 // - add support for prefetching on click
 // - add support for prefetching on scroll
