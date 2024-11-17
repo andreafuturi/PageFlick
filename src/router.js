@@ -152,8 +152,8 @@ const startRouter = (options = {}) => {
           animation: pulse 1s infinite alternate;
       }
       @keyframes pulse {
-          from { opacity: 0.8; }
-          to { opacity: 0.3; }
+          from { opacity: 0.6; }
+          to { opacity: 0.1; }
       }
       route {
         content-visibility: auto;
@@ -189,3 +189,10 @@ const startRouter = (options = {}) => {
 };
 
 export { startRouter };
+
+// TODO: create ultra minified version or deploy
+// - add support for prefetching on hover
+// - add support for prefetching on click
+// - add support for prefetching on scroll
+// - add support for prefetching on focus
+// - add support for prefetching on touch
