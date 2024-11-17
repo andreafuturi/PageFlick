@@ -92,9 +92,39 @@ Your website content
 </script>
 ```
 
+## Prefetching
+
+By default, links are prefetched when they get in the user's screen using an `IntersectionObserver`. This ensures that the content is loaded in the background before the user clicks on the link, providing a smoother navigation experience.
+This behaviour is automatically disabled if the user has data saving preferences.
+
+
+If you have too many links at once or too many requests, you can add the `prefetch="onHover"` attribute to your links or some of them (usually links to huge pages that are not often visited):
+
+```html
+<a href="/archive" prefetch="onHover">Archive</a>
+```
+
+P.S. you can easily test in your website by pasting the ultra minified version into the console.
+The minified version was created with uglify-js, clean.css and then ultra minified with https://packjs.com
+The size of the gzipped version was calculated with: https://dafrok.github.io/gzip-size-online/
+It's worth to note that nonetheless Terser give better results than uglify-js. The final uglify version packed by packjs.com was even smaller.
+
+## Browser Support
+
+The router supports all modern browsers. Required features:
+
+- IntersectionObserver
+- Fetch API
+- History API
+
+For older browsers, consider using the following polyfills:
+
+- intersection-observer
+- whatwg-fetch
+
 ## Server Configuration
 
-Configuring your server to return only the route content can make the router much more efficient. Instead of returning the entire page, the server should return only the content for the requested route when it detects a request with the message "onlyRoute".
+Configuring your server to return only the route content can make the router much more efficient. Instead of returning the entire page, the server could return only the content for the requested route when it detects a request with the message "onlyRoute".
 
 ```javascript
 await fetch(url, { method: "POST", body: "onlyRoute" });
@@ -126,35 +156,6 @@ In the future you will also be able to pre-render a default route that will be u
 Right now errors are shown without styling as the content of the page.
 
 Soon there will be a DenoJS library that will help you deal with all these routes stuff. It will also come with api routes functionality 🔥
-
-## Prefetching
-
-By default, links are prefetched when they get in the user's screen using an `IntersectionObserver`. This ensures that the content is loaded in the background before the user clicks on the link, providing a smoother navigation experience.
-
-If you have too many links at once or too many requests, you can add the `prefetch="onHover"` attribute to your links or some of them (usually links to huge pages that are not often visited):
-
-```html
-<a href="/archive" prefetch="onHover">Archive</a>
-```
-
-P.S. you can easily test in your website by pasting this minified version into the console.
-
-The minified version was created with uglify-js, clean.css and then minified again with https://packjs.com
-The size of the gzipped version was calculated with: https://dafrok.github.io/gzip-size-online/
-It's worth to note that nonethewise Terser give better results than uglify-js. The final uglify version packed by packjs.com was even smaller.
-
-## Browser Support
-
-The router supports all modern browsers. Required features:
-
-- IntersectionObserver
-- Fetch API
-- History API
-
-For older browsers, consider using the following polyfills:
-
-- intersection-observer
-- whatwg-fetch
 
 ## Performance Tips
 
