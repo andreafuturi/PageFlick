@@ -1,11 +1,11 @@
 {
   "name": "lightweight-router",
   "version": "1.0.2",
-  "main": "dist/router.min.js",
+  "main": "src/router.js",
   "scripts": {
     "dev": "npx http-server src -o",
     "build": "node build.js",
-    "deploy": "npm run build && npm version patch && git publish && npm publish",
+    "deploy": "npm run build && git publish && npm version patch && git publish && npm publish",
     "test": "jest",
     "test:watch": "jest --watch"
   },
