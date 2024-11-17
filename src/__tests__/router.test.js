@@ -129,4 +129,30 @@ describe("Router", () => {
     const route = document.querySelector('route[path="/about"]');
     expect(route.innerHTML).toContain("Couldn't fetch the route - HTTP error! status: 404");
   });
+
+  test("considers paths with and without trailing slashes as the same route", async () => {
+    // Mock the window.location object
+    delete window.location;
+    window.location = new URL("http://localhost/");
+
+    // Mock history.pushState to actually update the location
+    const originalPushState = window.history.pushState;
+    window.history.pushState = jest.fn((state, title, url) => {
+      window.location = new URL(url, "http://localhost");
+      originalPushState.call(window.history, state, title, url);
+    });
+
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    const linkWithSlash = document.createElement("a");
+    linkWithSlash.href = "/about/";
+    document.body.appendChild(linkWithSlash);
+    linkWithSlash.click();
+
+    // Wait for async operations
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    expect(window.location.pathname).toBe("/about");
+    expect(fetch).toHaveBeenCalledWith("/about", expect.any(Object));
+  });
 });

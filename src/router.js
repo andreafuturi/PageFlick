@@ -1,7 +1,7 @@
 let linkData = {};
 const handlePopState = async () => {
   document.body.classList.add("loading");
-  const currentPath = globalThis.location.pathname;
+  const currentPath = globalThis.location.pathname.replace(/\/$/, ""); // Normalize path by removing trailing slash
   const router = document.querySelector("router");
 
   let currentRoute = router.querySelector(`route[path="${currentPath}"]`);
