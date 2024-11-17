@@ -148,13 +148,15 @@ const startRouter = (options = {}) => {
   if (onRouteChange) setRouteChangeHandler(onRouteChange);
   const style = document.createElement("style");
   style.textContent = `
-      body.loading {
-          animation: pulseOpacity 1s infinite alternate;
+      .loading {
+          animation: pulse 1s infinite alternate;
       }
-
-      @keyframes pulseOpacity {
+      @keyframes pulse {
           from { opacity: 0.8; }
           to { opacity: 0.3; }
+      }
+      route {
+        content-visibility: auto;
       }
   `;
   document.head.appendChild(style);
@@ -166,7 +168,6 @@ const startRouter = (options = {}) => {
     router = document.createElement("router");
     const route = document.createElement("route");
     route.setAttribute("path", currentPath);
-    route.style.contentVisibility = "auto";
     route.innerHTML = document.body.innerHTML;
     router.appendChild(route);
     document.body.innerHTML = "";
