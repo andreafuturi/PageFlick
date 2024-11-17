@@ -34,6 +34,10 @@ Example:
 ```javascript
 import { startRouter } from "lightweight-router";
 
+startRouter()
+
+//or with your callback
+
 startRouter({
   onRouteChange: currentRoute => {
     console.log("Route changed:", currentRoute);
@@ -55,7 +59,7 @@ You can also directly import the minified version of the router in your HTML fil
   </head>
   <body>
     <!-- Your website content -->
-    <script src="path/to/dist/router.min.js"></script>
+    <script src="path/to/router.ultramin.js"></script>
   </body>
 </html>
 ```
