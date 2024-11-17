@@ -1,6 +1,6 @@
 {
   "name": "lightweight-router",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "src/router.js",
   "scripts": {
     "dev": "npx http-server src -o",
