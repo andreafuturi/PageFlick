@@ -159,7 +159,18 @@ Right now errors are shown without styling as the content of the page.
 Soon there will be a DenoJS library that will help you deal with all these routes stuff. It will also come with api routes functionality 🔥
 
 ## Performance Tips
-
-- Use `content-visibility: auto` on route elements to improve rendering performance
 - Implement server-side partial responses for better bandwidth usage
 - Consider using the `prefetch="onHover"` attribute for less important links
+
+## Future Development
+- Delay router intialization on first link hover for better performances?
+- Implement html streaming for faster page load
+- Cooler Error handling
+- Disable caching on certain links/routes (that needs to be always up to date)
+- Cache limiting
+
+
+
+
+
+
