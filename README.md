@@ -12,6 +12,7 @@ A minimal lightweight client-side router with intelligent prefetching capabiliti
 - 📱 Mobile-friendly with data-saver mode support
 - 🎨 Built-in loading animations
 - 🕰️ Based on History API so you can use native browser navigation
+- 🤖 Automatic title change
 
 
 ## Installation
@@ -107,11 +108,11 @@ If you have too many links at once or too many requests, you can add the `prefet
 P.S. you can easily test in your website by pasting the ultra minified version into the console.
 The minified version was created with uglify-js, clean.css and then ultra minified with https://packjs.com
 The size of the gzipped version was calculated with: https://dafrok.github.io/gzip-size-online/
-It's worth to note that nonetheless Terser give better results than uglify-js. The final uglify version packed by packjs.com was even smaller.
+It's worth to note that nonetheless Terser give better results than uglify-js. The final uglify version packed by packjs.com was the smallest.
 
 ## Browser Support
 
-The router supports all modern browsers. Required features:
+The router is intended for modern browsers. Required features:
 
 - IntersectionObserver
 - Fetch API
@@ -122,7 +123,7 @@ For older browsers, consider using the following polyfills:
 - intersection-observer
 - whatwg-fetch
 
-## Server Configuration
+## Optional Server Configuration
 
 Configuring your server to return only the route content can make the router much more efficient. Instead of returning the entire page, the server could return only the content for the requested route when it detects a request with the message "onlyRoute".
 
@@ -137,7 +138,7 @@ Once you configured your server to respond to this type of request, wrap the par
 ```html
 <-- Header menu and parts that don't change -->
 <router>
-  <route path="/" style="content-visibility: auto">home content</route>
+  <route path="/">home content</route>
 </router>
 <-- footer etc.. -->
 ```
