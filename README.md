@@ -143,12 +143,12 @@ Once you configured your server to respond to this type of request, wrap the par
 <-- footer etc.. -->
 ```
 
-You can also prerender other important routes by rendering them inside the `router` tag in their appropriate `route` tags for faster loading times:
+You can also prerender most visited routes by rendering them inside the `router` tag in their appropriate `route` tags for faster loading times:
 
 ```html
 <router>
-  <route path="/" style="content-visibility: auto">home content</route>
-  <route path="/about" style="content-visibility: auto; display:none;">about content</route>
+  <route path="/">home content</route>
+  <route path="/about" style="display:none;">about content</route>
 </router>
 ```
 
@@ -156,7 +156,9 @@ In the future you will also be able to pre-render a default route that will be u
 
 Right now errors are shown without styling as the content of the page.
 
-Soon there will be a DenoJS library that will help you deal with all these routes stuff. It will also come with api routes functionality 🔥
+If you like to use Preact and Deno for easy server config consider using the server side router present in [Singularity](https://github.com/andreafuturi/Singularity/) framework.
+It does exactly what we're talking about automatically by returning full html renders on normal request (sorrounded by an Index.jsx) and returing only partial route html when route is requested from inside the page (with onlyRoute param).
+
 
 ## Performance Tips
 - Implement server-side partial responses for better bandwidth usage
