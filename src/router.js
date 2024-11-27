@@ -1,5 +1,8 @@
 let linkData = {};
+let debugMode = false;
+const log = (...args) => debugMode && console.log("🚦 Router:", ...args);
 const handlePopState = async () => {
+  log("Navigation triggered to:", globalThis.location.pathname);
   document.body.classList.add("loading");
   const currentPath = globalThis.location.pathname.replace(/\/$/, ""); // Normalize path by removing trailing slash
   const router = document.querySelector("router");
@@ -8,6 +11,7 @@ const handlePopState = async () => {
 
   // If the route doesn't exist in DOM, create and append it
   if (!currentRoute) {
+    log("Creating new route element for:", currentPath);
     currentRoute = document.createElement("route");
     currentRoute.setAttribute("path", currentPath);
     router.appendChild(currentRoute);
@@ -15,6 +19,7 @@ const handlePopState = async () => {
 
   // Only fetch and render content if the route is empty
   if (!currentRoute.innerHTML) {
+    log("Fetching content for:", globalThis.location.href);
     let content = linkData[globalThis.location.href];
 
     // Fetch content if it's not already cached
@@ -28,12 +33,16 @@ const handlePopState = async () => {
 
     // Update the page title with the new content's title
     const newTitle = doc.querySelector("title");
-    if (newTitle) document.title = newTitle.textContent;
+    if (newTitle) {
+      log("Updating page title to:", newTitle.textContent);
+      document.title = newTitle.textContent;
+    }
 
     currentRoute.innerHTML = doc.body.innerHTML;
 
     // Execute scripts from the fetched content
     const scripts = Array.from(currentRoute.querySelectorAll("script"));
+    log("Executing", scripts.length, "scripts from fetched content");
     for (const oldScript of scripts) {
       const newScript = document.createElement("script");
       if (oldScript.src) {
@@ -54,12 +63,14 @@ const handlePopState = async () => {
 
   // Call the route change handler if it's set
   if (onRouteChange) onRouteChange(currentPath);
+  log("Route change completed");
 };
 
 //link management
 
 const fetchAndSaveContent = async link => {
   if (!linkData[link.href]) {
+    log("Prefetching content for:", link.href);
     linkData[link.href] = await fetchContent(link.href);
   }
 };
@@ -85,8 +96,12 @@ const handleLinkHover = async event => {
 
 const handleLinkClick = e => {
   const link = e.target.closest("A");
-  if (!link || !link.href || !isInternalLink(link.href) || link.origin !== location.origin) return;
-  else e.preventDefault();
+  if (!link || !link.href || !isInternalLink(link.href) || link.origin !== location.origin) {
+    log("Invalid link click:", link?.href);
+    return;
+  }
+  log("Internal link clicked:", link.href);
+  e.preventDefault();
   globalThis.history.pushState(null, null, link.href);
   globalThis.dispatchEvent(new Event("popstate"));
 };
@@ -149,7 +164,9 @@ const fetchWithFallback = async url => {
 
 let routerCreatedManually = false;
 const startRouter = (options = {}) => {
-  const { onRouteChange } = options;
+  const { onRouteChange, debug } = options;
+  debugMode = debug;
+  log("Router starting...", options);
   if (onRouteChange) setRouteChangeHandler(onRouteChange);
   const style = document.createElement("style");
   style.textContent = `
@@ -170,6 +187,7 @@ const startRouter = (options = {}) => {
   const currentPath = globalThis.location.pathname;
 
   if (!router) {
+    log("Creating new router element");
     router = document.createElement("router");
     const route = document.createElement("route");
     route.setAttribute("path", currentPath);
@@ -197,8 +215,3 @@ export { startRouter };
 
 // TODO: create ultra minified version or deploy
 // TODO: write proper automated tests
-// - add support for prefetching on hover
-// - add support for prefetching on click
-// - add support for prefetching on scroll
-// - add support for prefetching on focus
-// - add support for prefetching on touch
