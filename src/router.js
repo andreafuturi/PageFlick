@@ -76,12 +76,22 @@ const fetchAndSaveContent = async link => {
 };
 
 const handleLinkIntersection = (entries, observer) => {
+  log("🔍 Intersection Observer triggered for", entries.length, "entries");
   entries.forEach(entry => {
+    const link = entry.target;
+    log(`🎯 Link ${link.href} intersection:`, {
+      isIntersecting: entry.isIntersecting,
+      intersectionRatio: entry.intersectionRatio,
+      alreadyCached: !!linkData[link.href],
+    });
+
     if (entry.isIntersecting) {
-      const link = entry.target;
       if (!linkData[link.href]) {
         fetchAndSaveContent(link);
+        log("👁️ Unobserving link after prefetch initiated:", link.href);
         observer.unobserve(link);
+      } else {
+        log("📦 Content already cached for:", link.href);
       }
     }
   });
@@ -110,8 +120,25 @@ const observeLinks = observer => {
   const saveDataOn = navigator.connection && navigator.connection.saveData;
   const links = document.querySelectorAll("a");
 
+  log("🔄 Starting link observation...", {
+    totalLinks: links.length,
+    saveDataMode: saveDataOn,
+  });
+
   links.forEach(link => {
-    if (link.getAttribute("prefetch") !== "onHover" && !saveDataOn && !isInternalLink(link.href)) observer.observe(link);
+    const shouldObserve = link.getAttribute("prefetch") !== "onHover" && !saveDataOn && isInternalLink(link.href);
+
+    log("🔗 Link evaluation:", {
+      href: link.href,
+      prefetchAttr: link.getAttribute("prefetch"),
+      isInternal: isInternalLink(link.href),
+      willObserve: shouldObserve,
+    });
+
+    if (shouldObserve) {
+      observer.observe(link);
+      log("👀 Now observing link:", link.href);
+    }
   });
 };
 
@@ -207,7 +234,15 @@ const startRouter = (options = {}) => {
     }
   });
 
-  const observer = new IntersectionObserver(handleLinkIntersection, { root: null, threshold: 0.5 });
+  const observer = new IntersectionObserver(handleLinkIntersection, {
+    root: null,
+    threshold: 0.5,
+  });
+  log("🎭 Created Intersection Observer with config:", {
+    root: "viewport",
+    threshold: 0.5,
+  });
+
   observeLinks(observer);
 };
 
