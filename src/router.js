@@ -55,8 +55,8 @@ const handlePopState = async () => {
   }
 
   // Display only the current route
-  router.querySelectorAll("route").forEach(route => (route.style.display = "none"));
-  currentRoute.style.display = "contents";
+  router.querySelectorAll("route").forEach(route => (route.style.contentVisibility = "hidden"));
+  currentRoute.style.contentVisibility = "visible";
 
   document.body.classList.remove("loading");
   window.scrollTo(0, 0);
