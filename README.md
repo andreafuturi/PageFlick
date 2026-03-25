@@ -13,7 +13,7 @@ PageFlick is a minimal lightweight client-side router with intelligent prefetchi
 - 🎨 Built-in loading animations
 - 🕰️ Based on History API so you can use native browser navigation
 - 🤖 Automatic title change
-
+- 📜 **Scroll routes** — multi-section landing pages: full-height `<route scroll>` blocks, smooth in-page navigation, and URL bar sync while scrolling
 
 ## Installation
 
@@ -35,14 +35,15 @@ Example:
 ```javascript
 import { startRouter } from "lightweight-router";
 
-startRouter()
+startRouter();
 
 //or with your callback
 
 startRouter({
-  onRouteChange: currentRoute => {
-    console.log("Route changed:", currentRoute);
+  onRouteChange: path => {
+    console.log("Route changed:", path);
   },
+  debug: true, // optional: log router activity to the console
 });
 ```
 
@@ -74,7 +75,8 @@ Initializes the router with the given options.
 #### Parameters
 
 - `options` (Object): Configuration options for the router.
-  - `onRouteChange` (Function): Callback function to be called when the route changes.
+  - `onRouteChange` (Function): Called with the **current path string** when the route changes (including when the URL is updated while scrolling through scroll routes).
+  - `debug` (Boolean): When `true`, logs navigation and prefetch activity to the console.
 
 ## Examples
 
@@ -86,18 +88,19 @@ Your website content
   import { startRouter } from "./router.js";
 
   startRouter({
-    onRouteChange: currentRoute => {
-      console.log("Route changed:", currentRoute);
+    onRouteChange: path => {
+      console.log("Route changed:", path);
     },
   });
 </script>
 ```
 
+See **`src/index.html`** in this repo for a full **scroll routes** landing example (`<route scroll>` sections and nav).
+
 ## Prefetching
 
 By default, links are prefetched when they get in the user's screen using an `IntersectionObserver`. This ensures that the content is loaded in the background before the user clicks on the link, providing a smoother navigation experience.
 This behaviour is automatically disabled if the user has data saving preferences.
-
 
 If you have too many links at once or too many requests, you can add the `prefetch="onHover"` attribute to your links or some of them (usually links to huge pages that are not often visited):
 
@@ -109,6 +112,31 @@ P.S. you can easily test in your website by pasting the ultra minified version i
 The minified version was created with uglify-js, clean.css and then ultra minified with https://packjs.com
 The size of the gzipped version was calculated with: https://dafrok.github.io/gzip-size-online/
 It's worth to note that nonetheless Terser give better results than uglify-js. The final uglify version packed by packjs.com was the smallest.
+
+## Scroll routes (landing sections)
+
+Use this for a **single HTML page** that behaves like several “routes”: tall sections that share one document, each with its own pathname. Mark sections with **`scroll`** on `<route>` and a **`path`** that matches the URL you want in the address bar.
+
+```html
+<router>
+  <route scroll path="/">
+    <!-- hero -->
+  </route>
+  <route scroll path="/features">
+    <!-- features -->
+  </route>
+  <route scroll path="/pricing.html">
+    <!-- pricing -->
+  </route>
+</router>
+```
+
+**Behavior**
+
+- When the current URL matches a **`route[scroll]`** `path`, all scroll routes are shown (non-scroll routes inside `<router>` are hidden), and the matching section is scrolled into view. Internal links to another scroll route use **smooth** scrolling.
+- While the user scrolls, an **IntersectionObserver** picks the most visible section and updates the URL with **`history.replaceState`** (and fires `onRouteChange`) so the address bar tracks the section in view.
+- Empty scroll routes still **fetch** HTML from the server like normal routes (prefetching applies the same way).
+- **Deep links**: opening `/features` directly only works if your static server **falls back to this HTML** for unknown paths (for example `npx serve . --single`).
 
 ## Browser Support
 
@@ -136,11 +164,11 @@ This allows only the changing part of the document to be updated, improving perf
 Once you configured your server to respond to this type of request, wrap the part of your document that changes in a `router` tag. Inside the `router` tag, render the current initial route inside a `route` tag like this:
 
 ```html
-<-- Header menu and parts that don't change -->
+<!-- Header menu and parts that don't change -->
 <router>
   <route path="/">home content</route>
 </router>
-<-- footer etc.. -->
+<!-- footer etc.. -->
 ```
 
 You can also prerender most visited routes by rendering them inside the `router` tag in their appropriate `route` tags for faster loading times:
@@ -159,20 +187,15 @@ Right now errors are shown without styling as the content of the page.
 If you like to use Preact and Deno for easy server config consider using the server side router present in [Singularity](https://github.com/andreafuturi/Singularity/) framework.
 It does exactly what we're talking about automatically by returning full html renders on normal request (sorrounded by an Index.jsx) and returing only partial route html when route is requested from inside the page (with onlyRoute param).
 
-
 ## Performance Tips
+
 - Implement server-side partial responses for better bandwidth usage
 - Consider using the `prefetch="onHover"` attribute for less important links
 
 ## Future Development
+
 - Delay router intialization on first link hover for better performances?
 - Implement html streaming for faster page load
 - Cooler Error handling
 - Disable caching on certain links/routes (that needs to be always up to date)
 - Cache limiting
-
-
-
-
-
-
