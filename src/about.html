@@ -2,22 +2,84 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Router manual test About</title>
+    <title>About | PageFlick Demo</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: system-ui, sans-serif;
+      }
+      nav {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        display: flex;
+        gap: 1rem;
+        padding: 1rem 2rem;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+        z-index: 100;
+        border-bottom: 1px solid #eee;
+      }
+      nav a {
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+      }
+      nav a:hover {
+        color: #000;
+      }
+      route[scroll] {
+        display: block;
+      }
+      section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 6rem 2rem 2rem;
+        gap: 1rem;
+      }
+      section h1 {
+        font-size: 3rem;
+      }
+      section p {
+        font-size: 1.25rem;
+        color: #555;
+        max-width: 600px;
+        text-align: center;
+      }
+      #hero {
+        background: #f0f4ff;
+      }
+      #features {
+        background: #f0fff4;
+      }
+      #pricing {
+        background: #fff0f4;
+      }
+    </style>
   </head>
-  <body style="background-color: bisque">
-    <menu class="flex m-0 p-0"
-      ><a prefetch="onHover" href="/">Home</a><a href="/about.html">About</a><a href="/admin" prefetch="onHover">Admin</a
-      ><a href="/irmfirmiror" prefetch="onHover">404</a> <a href="https://andreafuturi.com" prefetch="onHover">Google Test</a>
-    </menu>
-    ABOUT
+  <body>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/features">Features</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/about.html">About (regular route)</a>
+    </nav>
+    <section id="about">
+      <h1>About</h1>
+      <p>This is the about page.</p>
+      <a href="/">Back to home ↑</a>
+    </section>
     <script type="module">
       import { startRouter } from "./router.js";
-      // Initialize the router with a simple onRouteChange callback to test functionality
       startRouter({
-        onRouteChange: currentRoute => {
-          console.log("Route changed:", currentRoute);
-          currentRoute.classList.add("fade-in"); // Example: simple CSS class for animation (define it in CSS if needed)
-        },
+        onRouteChange: path => console.log("Route:", path),
       });
     </script>
   </body>
