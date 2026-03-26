@@ -1,60 +1,6 @@
 let linkData = {};
 let debugMode = false;
 const log = (...args) => debugMode && console.log("🚦 Router:", ...args);
-
-/** @type {'auto' | 'smooth'} */
-let pendingScrollBehavior = "auto";
-let scrollUrlObserver = null;
-let suppressScrollUrlSyncUntil = 0;
-
-const normalizePath = p => {
-  const s = (p ?? "").replace(/\/$/, "");
-  return s;
-};
-
-/** @param {Element} router */
-const pathToScrollRoute = (router, path) => {
-  const n = normalizePath(path);
-  for (const r of router.querySelectorAll("route[scroll]")) {
-    if (normalizePath(r.getAttribute("path")) === n) return r;
-  }
-  return null;
-};
-
-const teardownScrollUrlObserver = () => {
-  scrollUrlObserver?.disconnect();
-  scrollUrlObserver = null;
-};
-
-/** @param {Element} router */
-const setupScrollUrlObserver = router => {
-  teardownScrollUrlObserver();
-  const scrollRoutes = [...router.querySelectorAll("route[scroll]")];
-  if (!scrollRoutes.length) return;
-
-  scrollUrlObserver = new IntersectionObserver(
-    entries => {
-      if (Date.now() < suppressScrollUrlSyncUntil) return;
-      const visible = entries.filter(e => e.isIntersecting);
-      if (!visible.length) return;
-      visible.sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-      const best = visible[0].target;
-      const pathAttr = best.getAttribute("path");
-      if (!pathAttr) return;
-      const nextPath = normalizePath(pathAttr);
-      const here = normalizePath(globalThis.location.pathname);
-      if (nextPath === here) return;
-      const u = new URL(globalThis.location.href);
-      u.pathname = pathAttr.startsWith("/") ? pathAttr : `/${pathAttr}`;
-      globalThis.history.replaceState(null, "", u.pathname + u.search + u.hash);
-      log("📍 Scroll URL sync:", nextPath);
-      if (onRouteChange) onRouteChange(nextPath);
-    },
-    { root: null, rootMargin: "-38% 0px -38% 0px", threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] },
-  );
-  scrollRoutes.forEach(r => scrollUrlObserver.observe(r));
-};
-
 const handlePopState = async () => {
   log("Navigation triggered to:", globalThis.location.pathname);
   document.body.classList.add("loading");
@@ -108,38 +54,12 @@ const handlePopState = async () => {
     }
   }
 
-  const scrollRoutes = [...router.querySelectorAll("route[scroll]")];
-  const nonScrollRoutes = [...router.querySelectorAll("route:not([scroll])")];
-  const scrollTarget = pathToScrollRoute(router, currentPath);
-  const inScrollMode = Boolean(scrollTarget);
-
-  if (inScrollMode) {
-    scrollRoutes.forEach(r => {
-      r.style.display = "";
-    });
-    nonScrollRoutes.forEach(r => {
-      r.style.display = "none";
-    });
-    const behavior = pendingScrollBehavior;
-    pendingScrollBehavior = "auto";
-    if (behavior === "smooth") {
-      suppressScrollUrlSyncUntil = Date.now() + 550;
-    }
-    requestAnimationFrame(() => {
-      scrollTarget.scrollIntoView({ behavior, block: "start" });
-      requestAnimationFrame(() => setupScrollUrlObserver(router));
-    });
-  } else {
-    teardownScrollUrlObserver();
-    scrollRoutes.forEach(r => {
-      r.style.display = "none";
-    });
-    router.querySelectorAll("route").forEach(route => (route.style.display = "none"));
-    currentRoute.style.display = "contents";
-    window.scrollTo(0, 0);
-  }
+  // Display only the current route
+  router.querySelectorAll("route").forEach(route => (route.style.display = "none"));
+  currentRoute.style.display = "contents";
 
   document.body.classList.remove("loading");
+  window.scrollTo(0, 0);
 
   // Call the route change handler if it's set
   if (onRouteChange) onRouteChange(currentPath);
@@ -188,17 +108,6 @@ const handleLinkClick = e => {
   const link = e.target.closest("A");
   if (!link || !link.href || !isInternalLink(link.href) || link.origin !== location.origin) {
     log("Invalid link click:", link?.href);
-    return;
-  }
-  const router = document.querySelector("router");
-  const url = new URL(link.href);
-  const targetPath = url.pathname.replace(/\/$/, "");
-  if (router && pathToScrollRoute(router, targetPath)) {
-    log("🔗 Scroll-route link → smooth scroll:", link.href);
-    e.preventDefault();
-    pendingScrollBehavior = "smooth";
-    globalThis.history.pushState(null, null, link.href);
-    globalThis.dispatchEvent(new Event("popstate"));
     return;
   }
   log("Internal link clicked:", link.href);
@@ -335,8 +244,6 @@ const startRouter = (options = {}) => {
   });
 
   observeLinks(observer);
-
-  void handlePopState();
 };
 
 export { startRouter };
