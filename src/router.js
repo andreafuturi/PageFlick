@@ -1,13 +1,36 @@
 let linkData = {};
 let debugMode = false;
 const log = (...args) => debugMode && console.log("🚦 Router:", ...args);
+
+const getTitle = (el, path) => {
+  const tag = el?.querySelector("title");
+  if (tag) return tag.textContent;
+  const segment = path.replace(/\.html$/, "").split("/").filter(Boolean).pop();
+  return segment ? segment.charAt(0).toUpperCase() + segment.slice(1) : "Home";
+};
+
+const showScrollRoutes = router => {
+  router.querySelectorAll("route[scroll]").forEach(r => r.style.removeProperty("display"));
+  router.querySelectorAll("route:not([scroll])").forEach(r => (r.style.display = "none"));
+};
+
 const handlePopState = async () => {
   log("Navigation triggered to:", globalThis.location.pathname);
   document.body.classList.add("loading");
-  const currentPath = globalThis.location.pathname.replace(/\/$/, ""); // Normalize path by removing trailing slash
+  const currentPath = globalThis.location.pathname.replace(/\/$/, "") || "/"; // Normalize path, preserve root "/"
   const router = document.querySelector("router");
 
   let currentRoute = router.querySelector(`route[path="${currentPath}"]`);
+
+  // Handle scroll route navigation — show all scroll routes and smooth-scroll to target
+  if (currentRoute?.hasAttribute("scroll")) {
+    showScrollRoutes(router);
+    document.body.classList.remove("loading");
+    currentRoute.scrollIntoView({ behavior: "smooth" });
+    if (onRouteChange) onRouteChange(currentPath);
+    log("Scroll route navigation completed");
+    return;
+  }
 
   // If the route doesn't exist in DOM, create and append it
   if (!currentRoute) {
@@ -32,11 +55,8 @@ const handlePopState = async () => {
     const doc = parser.parseFromString(content, "text/html");
 
     // Update the page title with the new content's title
-    const newTitle = doc.querySelector("title");
-    if (newTitle) {
-      log("Updating page title to:", newTitle.textContent);
-      document.title = newTitle.textContent;
-    }
+    document.title = getTitle(doc, currentPath);
+    log("Updating page title to:", document.title);
 
     currentRoute.innerHTML = doc.body.innerHTML;
 
@@ -54,7 +74,7 @@ const handlePopState = async () => {
     }
   }
 
-  // Display only the current route
+  // Display only the current route (hides scroll routes too when on a regular route)
   router.querySelectorAll("route").forEach(route => (route.style.display = "none"));
   currentRoute.style.display = "contents";
 
@@ -211,7 +231,7 @@ const startRouter = (options = {}) => {
   document.head.appendChild(style);
 
   let router = document.querySelector("router");
-  const currentPath = globalThis.location.pathname;
+  const currentPath = globalThis.location.pathname.replace(/\/$/, "") || "/";
 
   if (!router) {
     log("Creating new router element");
@@ -244,6 +264,34 @@ const startRouter = (options = {}) => {
   });
 
   observeLinks(observer);
+
+  // Initialize scroll routes
+  const scrollRoutes = router.querySelectorAll("route[scroll]");
+  if (scrollRoutes.length) {
+    const currentScrollRoute = router.querySelector(`route[path="${currentPath}"][scroll]`);
+    if (currentScrollRoute) {
+      // Direct URL visit to a scroll route — show all scroll sections and jump instantly
+      showScrollRoutes(router);
+      currentScrollRoute.scrollIntoView({ behavior: "instant" });
+    }
+
+    // Update URL and title as scroll routes enter the viewport
+    const scrollObserver = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const path = entry.target.getAttribute("path") || "/";
+            globalThis.history.replaceState(null, null, path);
+            document.title = getTitle(entry.target, path);
+            if (onRouteChange) onRouteChange(path);
+          }
+        });
+      },
+      { threshold: 0.6 }
+    );
+
+    scrollRoutes.forEach(route => scrollObserver.observe(route));
+  }
 };
 
 export { startRouter };

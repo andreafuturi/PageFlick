@@ -13,6 +13,7 @@ PageFlick is a minimal lightweight client-side router with intelligent prefetchi
 - 🎨 Built-in loading animations
 - 🕰️ Based on History API so you can use native browser navigation
 - 🤖 Automatic title change
+- 📜 Scroll route sections with automatic URL/title updates
 
 
 ## Installation
@@ -163,6 +164,55 @@ It does exactly what we're talking about automatically by returning full html re
 ## Performance Tips
 - Implement server-side partial responses for better bandwidth usage
 - Consider using the `prefetch="onHover"` attribute for less important links
+
+## Scroll Routes
+
+The `scroll` attribute on a `<route>` marks it as a scrollable section. Scroll routes are stacked vertically and always visible when in scroll-route context. Clicking a link to a scroll route smooth-scrolls to that section. As the user scrolls, the URL and page title update automatically to reflect the visible section.
+
+Use an optional `<title>` tag inside a scroll route to set the document title when that section is in view.
+
+```html
+<router>
+  <route path="/" scroll>
+    <title>Home | My Site</title>
+    <section style="min-height: 100vh">Hero content</section>
+  </route>
+  <route path="/features" scroll>
+    <title>Features | My Site</title>
+    <section style="min-height: 100vh">Features content</section>
+  </route>
+  <route path="/pricing" scroll>
+    <title>Pricing | My Site</title>
+    <section style="min-height: 100vh">Pricing content</section>
+  </route>
+</router>
+```
+
+You can mix scroll routes and regular routes. When navigating to a regular route, scroll routes are hidden. When navigating to a scroll route, regular routes are hidden and all scroll sections are visible.
+
+### Server configuration for direct URL access
+
+When a user visits a scroll route URL directly (e.g. `/features`), the server must serve the page containing the scroll routes. Configure your server to serve the same HTML file for all scroll route paths:
+
+**Nginx:**
+```nginx
+location ~ ^/(features|pricing)$ {
+  try_files $uri /home.html;
+}
+```
+
+**Express / Node.js:**
+```javascript
+app.get(["/", "/features", "/pricing"], (req, res) => {
+  res.sendFile(path.join(__dirname, "home.html"));
+});
+```
+
+**Vite / static dev servers:** Use a rewrite rule or `_redirects` file (Netlify/Vercel):
+```
+/features   /home.html  200
+/pricing    /home.html  200
+```
 
 ## Future Development
 - Delay router intialization on first link hover for better performances?
