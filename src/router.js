@@ -1,10 +1,11 @@
-let linkData = {};
+let cache = {};
 let debugMode = false;
+let globalTitle = "";
 const log = (...args) => debugMode && console.log("🚦 Router:", ...args);
 
 const getTitle = (el, path) => {
   const tag = el?.querySelector("title");
-  if (tag) return tag.textContent;
+  if (tag) return tag.textContent.split("|")[0].trim();
   const segment = path.replace(/\.html$/, "").split("/").filter(Boolean).pop();
   return segment ? segment.charAt(0).toUpperCase() + segment.slice(1) : "Home";
 };
@@ -32,32 +33,28 @@ const handlePopState = async () => {
     return;
   }
 
-  // If the route doesn't exist in DOM, create and append it
   if (!currentRoute) {
-    log("Creating new route element for:", currentPath);
     currentRoute = document.createElement("route");
     currentRoute.setAttribute("path", currentPath);
     router.appendChild(currentRoute);
+    log("Created route element for:", currentPath);
   }
 
-  // Only fetch and render content if the route is empty
+  // Fetch and render on first visit
   if (!currentRoute.innerHTML) {
     log("Fetching content for:", globalThis.location.href);
-    let content = linkData[globalThis.location.href];
+    let content = cache[globalThis.location.href];
 
     // Fetch content if it's not already cached
     if (!content) {
       content = await fetchContent(globalThis.location.href);
-      linkData[globalThis.location.href] = content;
+      cache[globalThis.location.href] = content;
     }
 
     const parser = new DOMParser();
     const doc = parser.parseFromString(content, "text/html");
 
-    // Update the page title with the new content's title
-    document.title = getTitle(doc, currentPath);
-    log("Updating page title to:", document.title);
-
+    currentRoute.dataset.routeTitle = getTitle(doc, currentPath);
     currentRoute.innerHTML = doc.body.innerHTML;
 
     // Execute scripts from the fetched content
@@ -74,9 +71,12 @@ const handlePopState = async () => {
     }
   }
 
-  // Display only the current route (hides scroll routes too when on a regular route)
+  // Show current route, hide the rest
   router.querySelectorAll("route").forEach(route => (route.style.display = "none"));
   currentRoute.style.display = "contents";
+
+  const routeLabel = currentRoute.dataset.routeTitle || getTitle(currentRoute, currentPath);
+  document.title = globalTitle ? `${routeLabel} | ${globalTitle}` : routeLabel;
 
   document.body.classList.remove("loading");
   window.scrollTo(0, 0);
@@ -89,9 +89,9 @@ const handlePopState = async () => {
 //link management
 
 const fetchAndSaveContent = async link => {
-  if (!linkData[link.href]) {
+  if (!cache[link.href]) {
     log("Prefetching content for:", link.href);
-    linkData[link.href] = await fetchContent(link.href);
+    cache[link.href] = await fetchContent(link.href);
   }
 };
 
@@ -102,11 +102,11 @@ const handleLinkIntersection = (entries, observer) => {
     log(`🎯 Link ${link.href} intersection:`, {
       isIntersecting: entry.isIntersecting,
       intersectionRatio: entry.intersectionRatio,
-      alreadyCached: !!linkData[link.href],
+      alreadyCached: !!cache[link.href],
     });
 
     if (entry.isIntersecting) {
-      if (!linkData[link.href]) {
+      if (!cache[link.href]) {
         fetchAndSaveContent(link);
         log("👁️ Unobserving link after prefetch initiated:", link.href);
         observer.unobserve(link);
@@ -119,7 +119,7 @@ const handleLinkIntersection = (entries, observer) => {
 
 const handleLinkHover = async event => {
   const link = event.target;
-  if (!linkData[link.href] && isInternalLink(link.href)) {
+  if (!cache[link.href] && isInternalLink(link.href)) {
     await fetchAndSaveContent(link);
   }
 };
@@ -202,17 +202,19 @@ const fetchContent = async url => {
 
 // Updated fetchWithFallback to check the flag
 const fetchWithFallback = async url => {
-  if (!routerCreatedManually) {
+  if (!manualMode) {
     const res = await fetch(url, { method: "POST", body: "onlyRoute" });
     if (res.ok) return res;
   }
   return await fetch(url);
 };
 
-let routerCreatedManually = false;
+let manualMode = false;
 const startRouter = (options = {}) => {
   const { onRouteChange, debug } = options;
   debugMode = debug;
+  const pageTitle = document.querySelector("title")?.textContent?.trim() ?? "";
+  globalTitle = pageTitle.includes("|") ? pageTitle.split("|").at(-1).trim() : pageTitle || "App";
   log("Router starting...", options);
   if (onRouteChange) setRouteChangeHandler(onRouteChange);
   const style = document.createElement("style");
@@ -242,7 +244,7 @@ const startRouter = (options = {}) => {
     router.appendChild(route);
     document.body.innerHTML = "";
     document.body.appendChild(router);
-    routerCreatedManually = true;
+    manualMode = true;
   }
 
   globalThis.addEventListener("popstate", handlePopState);
@@ -282,7 +284,8 @@ const startRouter = (options = {}) => {
           if (entry.isIntersecting) {
             const path = entry.target.getAttribute("path") || "/";
             globalThis.history.replaceState(null, null, path);
-            document.title = getTitle(entry.target, path);
+            const label = getTitle(entry.target, path);
+            document.title = globalTitle ? `${label} | ${globalTitle}` : label;
             if (onRouteChange) onRouteChange(path);
           }
         });
